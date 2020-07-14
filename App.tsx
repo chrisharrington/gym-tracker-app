@@ -1,21 +1,75 @@
-import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import { AppLoading } from 'expo';
+import { NavigationContainer } from '@react-navigation/native';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { View } from 'react-native';
+import { useFonts, Oswald_400Regular } from '@expo-google-fonts/oswald';
+import dayjs from 'dayjs'
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+import { Workout } from './models';
+
+import WorkoutsApi from './data/workouts';
+
+import WorkoutScreen from './screens/workout';
+
+const Drawer = createDrawerNavigator();
+
+interface IAppState {
+    workouts: Workout[];
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default () => {
+    const [fontsLoaded] = useFonts({
+        'Oswald': Oswald_400Regular
+    });
+
+    return fontsLoaded ? <App /> : <AppLoading />;
+}
+
+class App extends React.Component<{}, IAppState> {
+    state = {
+        workouts: []
+    }
+
+    async componentDidMount() {
+        this.setState({
+            workouts: await WorkoutsApi.get()
+        });
+    }
+
+    render() {
+        return this.state.workouts.length ? <NavigationContainer>
+            <StatusBar
+                style='light'
+            />
+
+            <Drawer.Navigator
+                drawerStyle={styles.drawer}
+                drawerContentOptions={{
+                    activeTintColor: '#0398fc',
+                    inactiveTintColor: '#ffffff'
+                }}
+            >
+                {this.state.workouts.map((workout: Workout) => {
+                    const date = dayjs().day(workout.day);
+                    return <Drawer.Screen
+                        key={workout.day}
+                        name={date.format('dddd')}
+                    >
+                        {props => <WorkoutScreen
+                            workout={workout}
+                            navigation={props.navigation}
+                        />}
+                    </Drawer.Screen>
+                })}
+            </Drawer.Navigator>
+        </NavigationContainer> : <View />;
+    }
+}
+
+const styles = {
+    drawer: {
+        backgroundColor: '#333333'
+    }
+}
