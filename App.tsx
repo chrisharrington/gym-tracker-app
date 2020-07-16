@@ -28,6 +28,8 @@ export default () => {
 }
 
 class App extends React.Component<{}, IAppState> {
+    private updateTimeout: any;
+
     state = {
         workouts: []
     }
@@ -60,11 +62,28 @@ class App extends React.Component<{}, IAppState> {
                         {props => <WorkoutScreen
                             workout={workout}
                             navigation={props.navigation}
+                            onWorkoutChanged={(workout: Workout) => this.onWorkoutChanged(workout)}
                         />}
                     </Drawer.Screen>
                 })}
             </Drawer.Navigator>
         </NavigationContainer> : <View />;
+    }
+
+    private onWorkoutChanged(workout: Workout) {
+        const workouts: Workout[] = this.state.workouts;
+        workouts.forEach((w: Workout, index: number) => {
+            if (w._id === workout._id)
+                workouts[index] = workout;
+        });
+        this.setState({ workouts });
+
+        if (this.updateTimeout)
+            clearTimeout(this.updateTimeout);
+
+        this.updateTimeout = setTimeout(async () => {
+            await WorkoutsApi.update(workout);
+        }, 1000);
     }
 }
 

@@ -3,16 +3,17 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 import StepInput from '../../components/step-input';
 
-interface ISetProps {
+interface ISetComponentProps {
     index: number;
     number: number;
     reps: number;
     weight: number;
     onRepsChanged: (reps: number) => void;
     onWeightChanged: (weight: number) => void;
+    onDelete: () => void;
 }
 
-export default class Set extends React.Component<ISetProps> {
+export default class SetComponent extends React.Component<ISetComponentProps> {
     render() {
         return <View style={style.container}>
             <View style={style.count}>
@@ -21,6 +22,8 @@ export default class Set extends React.Component<ISetProps> {
                     value={this.props.reps}
                     onChange={(reps: number) => this.props.onRepsChanged(reps)}
                     width={48}
+                    min={0}
+                    max={99}
                 />
             </View>
 
@@ -30,10 +33,12 @@ export default class Set extends React.Component<ISetProps> {
                     value={this.props.weight.toFixed(1)}
                     onChange={(weight: number) => this.props.onWeightChanged(weight)}
                     width={80}
+                    min={0}
+                    max={999}
                 />
             </View>
             
-            <TouchableOpacity style={style.delete}>
+            <TouchableOpacity style={style.delete} onPress={() => this.props.onDelete()}>
                 <Text style={style.deleteText}>╳</Text>
             </TouchableOpacity>
         </View>;

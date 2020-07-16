@@ -3,13 +3,14 @@ import { StyleSheet, Text, View, StatusBar, TouchableOpacity, ScrollView } from 
 import { Ionicons } from '@expo/vector-icons';
 import dayjs from 'dayjs';
 
-import { Workout, Exercise } from '../../models';
+import { Workout, Exercise, ExerciseEntry } from '../../models';
 
 import ExerciseComponent from './exercise';
 
 interface IWorkoutScreenProps {
     workout: Workout;
     navigation: any;
+    onWorkoutChanged: (workout: Workout) => void;
 }
 
 export default class WorkoutScreen extends React.Component<IWorkoutScreenProps> {
@@ -29,12 +30,19 @@ export default class WorkoutScreen extends React.Component<IWorkoutScreenProps> 
             </View>
 
             <ScrollView style={styles.exerciseContainer}>
-                {workout.exercises.map((exercise: Exercise) => <ExerciseComponent
+                {workout.exercises.map((exercise: Exercise, index: number) => <ExerciseComponent
                     key={exercise.name}
                     exercise={exercise}
+                    onExerciseEntryChanged={(date: string, entry: ExerciseEntry) => this.onExerciseEntryChanged(date, index, entry)}
                 />)}
             </ScrollView>
         </View>;
+    }
+
+    private onExerciseEntryChanged(date: string, exerciseIndex: number, entry: ExerciseEntry) {
+        const workout = this.props.workout;
+        workout.exercises[exerciseIndex].entries[date] = entry;
+        this.props.onWorkoutChanged(workout);
     }
 }
 

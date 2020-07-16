@@ -1,25 +1,24 @@
 import * as React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
-
-import Style from '../../style';
 
 import Tile from '../../components/tile';
 
-import { Exercise } from '../../models';
+import { Exercise, ExerciseEntry, Set } from '../../models';
+import Util from '../../util';
 
-import Set from './set';
-import { TouchableOpacity, TouchableHighlight } from 'react-native-gesture-handler';
+import SetComponent from './set';
+
 
 interface IExerciseProps {
     exercise: Exercise;
+    onExerciseEntryChanged: (date: string, entry: ExerciseEntry) => void;
 }
 
 export default class ExerciseComponent extends React.Component<IExerciseProps> {
     render() {
-        const exercise = this.props.exercise,
-            index = 0;
-            
+        const exercise = this.props.exercise;
         return <Tile style={style.container}>
             <View style={style.header}>
                 <Text style={style.headerText}>{exercise.name}</Text>
@@ -30,23 +29,68 @@ export default class ExerciseComponent extends React.Component<IExerciseProps> {
                 <Text style={{ ...style.setHeaderLabel, ...style.weightLabel }}>Weight</Text>
             </View>
             
-            {/* {new Array(exercise.sets).map((_, index: number) => ( */}
-                <View key={index} style={style.set}>
-                    <Set
-                        index={index}
-                        number={index+1}
-                        reps={5}
-                        weight={125}
-                        onRepsChanged={() => {}}
-                        onWeightChanged={() => {}}
-                    />
-                </View>
-            {/* ))} */}
+            {this.renderSets()}
 
-            <TouchableOpacity style={style.emptySetContainer}>
+            <TouchableOpacity style={style.emptySetContainer} onPress={() => this.onAddSet()}>
                 <Ionicons name='md-add' color='#777777' size={22} />
             </TouchableOpacity>
         </Tile>;
+    }
+
+    private renderSets() : JSX.Element[] {
+        const entry = this.props.exercise.entries[Util.today()] || { sets: [] };
+        return entry.sets.map((set, index) => (
+            <View key={index} style={style.set}>
+                <SetComponent
+                    index={index}
+                    number={index+1}
+                    reps={set.reps}
+                    weight={set.weight}
+                    onRepsChanged={(reps: number) => this.onRepsChanged(reps, index)}
+                    onWeightChanged={(weight: number) => this.onWeightChanged(weight, index)}
+                    onDelete={() => this.onDeleteSet(index)}
+                />
+            </View>
+        ));
+    }
+
+    private onRepsChanged(reps: number, index: number) {
+        let date = Util.today(),
+            entry = this.props.exercise.entries[date];
+
+        entry.sets[index].reps = reps;
+
+        this.props.onExerciseEntryChanged(date, entry);
+    }
+
+    private onWeightChanged(weight: number, index: number) {
+        let date = Util.today(),
+            entry = this.props.exercise.entries[date];
+
+        entry.sets[index].weight = weight;
+
+        this.props.onExerciseEntryChanged(date, entry);
+    }
+
+    private onAddSet() {
+        let date = Util.today(),
+            entry = this.props.exercise.entries[date];
+
+        if (!entry)
+            entry = new ExerciseEntry();
+
+        entry.sets.push(new Set());
+
+        this.props.onExerciseEntryChanged(date, entry);
+    }
+
+    private onDeleteSet(index: number) {
+        let date = Util.today(),
+            entry = this.props.exercise.entries[date];
+
+        entry.sets.splice(index, 1);
+
+        this.props.onExerciseEntryChanged(date, entry);
     }
 }
 
@@ -55,8 +99,6 @@ const style = StyleSheet.create({
         flex: 1,
         alignSelf: 'stretch',
         alignItems: 'stretch',
-        borderLeftWidth: 3,
-        borderLeftColor: Style.darkBaseColour,
         margin: 15,
         marginBottom: 0
     },
