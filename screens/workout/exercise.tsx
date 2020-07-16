@@ -9,6 +9,7 @@ import { Exercise, ExerciseEntry, Set } from '../../models';
 import Util from '../../util';
 
 import SetComponent from './set';
+import dayjs from 'dayjs';
 
 
 interface IExerciseProps {
@@ -38,35 +39,60 @@ export default class ExerciseComponent extends React.Component<IExerciseProps> {
     }
 
     private renderSets() : JSX.Element[] {
-        const entry = this.props.exercise.entries[Util.today()] || { sets: [] };
-        return entry.sets.map((set, index) => (
+        const today = this.props.exercise.entries[Util.today()] || { sets: [] },
+            recent = this.getMostRecentEntry(this.props.exercise.entries);
+
+        if (!today.sets.length && recent)
+            return [<View key={0} style={style.set}>
+                <SetComponent
+                    index={0}
+                    number={1}
+                    repsPlaceholder={recent.sets[0].reps}
+                    weightPlaceholder={recent.sets[0].weight}
+                    onSetChanged={(reps: number, weight: number) => this.onSetChanged(0, reps, weight)}
+                />
+            </View>];
+
+        return today.sets.map((set, index) => (
             <View key={index} style={style.set}>
                 <SetComponent
                     index={index}
                     number={index+1}
                     reps={set.reps}
                     weight={set.weight}
-                    onRepsChanged={(reps: number) => this.onRepsChanged(reps, index)}
-                    onWeightChanged={(weight: number) => this.onWeightChanged(weight, index)}
+                    repsPlaceholder={0}
+                    weightPlaceholder={0}
+                    onSetChanged={(reps: number, weight: number) => this.onSetChanged(index, reps, weight)}
                     onDelete={() => this.onDeleteSet(index)}
                 />
             </View>
         ));
     }
 
-    private onRepsChanged(reps: number, index: number) {
-        let date = Util.today(),
-            entry = this.props.exercise.entries[date];
+    private getMostRecentEntry(entries: { [date: string] : ExerciseEntry }) : ExerciseEntry | null {
+        const dates = Object.keys(entries)
+            .map((date: string) => dayjs(date))
+            .sort((first: dayjs.Dayjs, second: dayjs.Dayjs) => first.isBefore(second) ? -1 : 1);
 
-        entry.sets[index].reps = reps;
+        if (dates.length > 0) {
+            const latest = dates[0];
+            if (!latest.startOf('d').isSame(dayjs().startOf('d')))
+                return entries[latest.format('MM/DD/YYYY')];
+        }
 
-        this.props.onExerciseEntryChanged(date, entry);
+        return null;
     }
 
-    private onWeightChanged(weight: number, index: number) {
+    private onSetChanged(index: number, reps: number, weight: number) {
         let date = Util.today(),
             entry = this.props.exercise.entries[date];
 
+        if (!entry)
+            entry = new ExerciseEntry();
+        if (!entry.sets[index])
+            entry.sets[index] = new Set();
+
+        entry.sets[index].reps = reps;
         entry.sets[index].weight = weight;
 
         this.props.onExerciseEntryChanged(date, entry);

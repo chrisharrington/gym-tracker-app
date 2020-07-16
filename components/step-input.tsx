@@ -4,23 +4,24 @@ import { Ionicons } from '@expo/vector-icons';
 
 interface IStepInputProps {
     step: number;
-    value: any;
+    value: number | undefined;
     onChange: (value: number) => void;
     width: number;
+    placeholder?: number;
     min?: number;
     max?: number;
+    display?: (value: any) => string;
 }
 
 export default class StepInput extends React.Component<IStepInputProps> {
     render() {
         return <View style={style.container}>
-        
             <TouchableOpacity style={{ ...style.wrapper, ...style.wrapperLeft }} onPress={() => this.onDecrease(this.props.step)} onLongPress={() => this.onDecrease(this.props.step * 4)}>
                 <Ionicons name='md-arrow-dropdown' color='#cccccc' size={16} />
             </TouchableOpacity>
         
             <View style={{ ...style.wrapper, ...{ width: this.props.width }}}>
-                <Text style={{ ...style.text, ...style.weight }}>{this.props.value.toString()}</Text>
+                <Text style={{ ...style.text, ...style.weight, ...{ color: this.props.value === undefined ? '#888888' : 'white' } }}>{this.getValue()}</Text>
             </View>
 
             <TouchableOpacity style={{ ...style.wrapper, ...style.wrapperRight }} onPress={() => this.onIncrease(this.props.step)} onLongPress={() => this.onIncrease(this.props.step * 4)}>
@@ -29,8 +30,13 @@ export default class StepInput extends React.Component<IStepInputProps> {
         </View>;
     }
 
+    private getValue() : string {
+        const value = (this.props.value === undefined ? this.props.placeholder : this.props.value) || 0;
+        return this.props.display ? this.props.display(value) : value.toString();
+    }
+
     private onDecrease(step: number) {
-        const value = parseFloat(this.props.value) - step,
+        const value = ((this.props.value === undefined ? this.props.placeholder : this.props.value) || 0) - step,
             min = this.props.min;
 
         if (!(min !== undefined && value < min))
@@ -38,7 +44,7 @@ export default class StepInput extends React.Component<IStepInputProps> {
     }
 
     private onIncrease(step: number) {
-        const value = parseFloat(this.props.value) + step,
+        const value = ((this.props.value === undefined ? this.props.placeholder : this.props.value) || 0) + step,
             max = this.props.max;
 
         if (!(max !== undefined && value > max))

@@ -6,11 +6,12 @@ import StepInput from '../../components/step-input';
 interface ISetComponentProps {
     index: number;
     number: number;
-    reps: number;
-    weight: number;
-    onRepsChanged: (reps: number) => void;
-    onWeightChanged: (weight: number) => void;
-    onDelete: () => void;
+    reps?: number;
+    weight?: number;
+    repsPlaceholder?: number;
+    weightPlaceholder?: number;
+    onSetChanged?: (reps: number, weight: number) => void;
+    onDelete?: () => void;
 }
 
 export default class SetComponent extends React.Component<ISetComponentProps> {
@@ -20,7 +21,8 @@ export default class SetComponent extends React.Component<ISetComponentProps> {
                 <StepInput
                     step={1}
                     value={this.props.reps}
-                    onChange={(reps: number) => this.props.onRepsChanged(reps)}
+                    placeholder={this.props.repsPlaceholder}
+                    onChange={(reps: number) => this.props.onSetChanged && this.props.onSetChanged(reps, (this.props.weight === undefined ? this.props.weightPlaceholder : this.props.weight) || 0)}
                     width={48}
                     min={0}
                     max={99}
@@ -30,15 +32,17 @@ export default class SetComponent extends React.Component<ISetComponentProps> {
             <View style={style.weight}>
                 <StepInput
                     step={2.5}
-                    value={this.props.weight.toFixed(1)}
-                    onChange={(weight: number) => this.props.onWeightChanged(weight)}
+                    value={this.props.weight}
+                    placeholder={this.props.weightPlaceholder}
+                    display={(value: any) => value.toFixed(1)}
+                    onChange={(weight: number) => this.props.onSetChanged && this.props.onSetChanged((this.props.reps === undefined ? this.props.repsPlaceholder : this.props.reps) || 0, weight)}
                     width={80}
                     min={0}
                     max={999}
                 />
             </View>
             
-            <TouchableOpacity style={style.delete} onPress={() => this.props.onDelete()}>
+            <TouchableOpacity style={style.delete} onPress={() => this.props.onDelete && this.props.onDelete()}>
                 <Text style={style.deleteText}>╳</Text>
             </TouchableOpacity>
         </View>;
