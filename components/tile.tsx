@@ -1,15 +1,20 @@
 import * as React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 
 interface ITileProps {
     style?: any;
+    onLongPress?: () => void;
 }
 
 export default class Tile extends React.Component<ITileProps> {
     render() {
-        return <View style={{...(this.props.style || {}), ...style.container}}>
+        return <TouchableOpacity
+            style={{ ...style.container, ...(this.props.style || {}) }}
+            activeOpacity={1}
+            onLongPress={() => this.props.onLongPress && this.props.onLongPress()}
+        >
             {this.props.children}
-        </View>;
+        </TouchableOpacity>;
     }
 }
 

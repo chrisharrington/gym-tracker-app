@@ -15,15 +15,24 @@ import dayjs from 'dayjs';
 interface IExerciseProps {
     exercise: Exercise;
     onExerciseEntryChanged: (date: string, entry: ExerciseEntry) => void;
+    onLongPress?: () => void;
+    style?: any;
+    highlight?: boolean;
 }
 
 export default class ExerciseComponent extends React.Component<IExerciseProps> {
     render() {
         const exercise = this.props.exercise;
-        return <Tile style={style.container}>
-            <View style={style.header}>
+        return <Tile
+            style={{ ...style.container, ...this.props.style || {}, ...(this.props.highlight ? style.highlight : {}) }}
+        >
+            <TouchableOpacity
+                activeOpacity={1}
+                style={style.header}
+                onLongPress={() => this.props.onLongPress && this.props.onLongPress()}
+            >
                 <Text style={style.headerText}>{exercise.name}</Text>
-            </View>
+            </TouchableOpacity>
 
             <View style={style.setHeader}>
                 <Text style={{ ...style.setHeaderLabel, ...style.repsLabel }}>Reps</Text>
@@ -42,17 +51,6 @@ export default class ExerciseComponent extends React.Component<IExerciseProps> {
         const today = this.props.exercise.entries[Util.today()] || { sets: [] },
             recent = this.getMostRecentEntry(this.props.exercise.entries);
 
-        if (!today.sets.length && recent)
-            return [<View key={0} style={style.set}>
-                <SetComponent
-                    index={0}
-                    number={1}
-                    repsPlaceholder={recent.sets[0].reps}
-                    weightPlaceholder={recent.sets[0].weight}
-                    onSetChanged={(reps: number, weight: number) => this.onSetChanged(0, reps, weight)}
-                />
-            </View>];
-
         return today.sets.map((set, index) => (
             <View key={index} style={style.set}>
                 <SetComponent
@@ -60,8 +58,6 @@ export default class ExerciseComponent extends React.Component<IExerciseProps> {
                     number={index+1}
                     reps={set.reps}
                     weight={set.weight}
-                    repsPlaceholder={0}
-                    weightPlaceholder={0}
                     onSetChanged={(reps: number, weight: number) => this.onSetChanged(index, reps, weight)}
                     onDelete={() => this.onDeleteSet(index)}
                 />
@@ -100,12 +96,27 @@ export default class ExerciseComponent extends React.Component<IExerciseProps> {
 
     private onAddSet() {
         let date = Util.today(),
-            entry = this.props.exercise.entries[date];
+            entry = this.props.exercise.entries[date],
+            recent = this.getMostRecentEntry(this.props.exercise.entries);
 
         if (!entry)
             entry = new ExerciseEntry();
 
-        entry.sets.push(new Set());
+        const set = new Set(),
+            latest = entry.sets[entry.sets.length-1];
+
+        if (latest) {
+            set.reps = latest.reps;
+            set.weight = latest.weight;
+        } else if (recent) {
+            const s = recent.sets[0];
+            if (s) {
+                set.reps = s.reps;
+                set.weight = s.weight;
+            }
+        }
+
+        entry.sets.push(set);
 
         this.props.onExerciseEntryChanged(date, entry);
     }
@@ -125,8 +136,11 @@ const style = StyleSheet.create({
         flex: 1,
         alignSelf: 'stretch',
         alignItems: 'stretch',
-        margin: 15,
-        marginBottom: 0
+        margin: 15
+    },
+
+    highlight: {
+        backgroundColor: '#404040'
     },
 
     header: {

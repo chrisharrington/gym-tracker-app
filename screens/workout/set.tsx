@@ -8,8 +8,6 @@ interface ISetComponentProps {
     number: number;
     reps?: number;
     weight?: number;
-    repsPlaceholder?: number;
-    weightPlaceholder?: number;
     onSetChanged?: (reps: number, weight: number) => void;
     onDelete?: () => void;
 }
@@ -21,8 +19,7 @@ export default class SetComponent extends React.Component<ISetComponentProps> {
                 <StepInput
                     step={1}
                     value={this.props.reps}
-                    placeholder={this.props.repsPlaceholder}
-                    onChange={(reps: number) => this.props.onSetChanged && this.props.onSetChanged(reps, (this.props.weight === undefined ? this.props.weightPlaceholder : this.props.weight) || 0)}
+                    onChange={(reps: number) => this.props.onSetChanged && this.props.onSetChanged(reps, this.props.weight || 0)}
                     width={48}
                     min={0}
                     max={99}
@@ -33,9 +30,8 @@ export default class SetComponent extends React.Component<ISetComponentProps> {
                 <StepInput
                     step={2.5}
                     value={this.props.weight}
-                    placeholder={this.props.weightPlaceholder}
                     display={(value: any) => value.toFixed(1)}
-                    onChange={(weight: number) => this.props.onSetChanged && this.props.onSetChanged((this.props.reps === undefined ? this.props.repsPlaceholder : this.props.reps) || 0, weight)}
+                    onChange={(weight: number) => this.props.onSetChanged && this.props.onSetChanged(this.props.reps || 0, weight)}
                     width={80}
                     min={0}
                     max={999}

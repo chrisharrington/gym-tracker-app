@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, View, StatusBar, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, StatusBar, TouchableOpacity, Vibration } from 'react-native';
+import DraggableFlatList, { RenderItemParams } from 'react-native-draggable-flatlist';
 import { Ionicons } from '@expo/vector-icons';
 import dayjs from 'dayjs';
 
@@ -29,19 +30,39 @@ export default class WorkoutScreen extends React.Component<IWorkoutScreenProps> 
                 </View>
             </View>
 
-            <ScrollView style={styles.exerciseContainer}>
-                {workout.exercises.map((exercise: Exercise, index: number) => <ExerciseComponent
-                    key={exercise.name}
-                    exercise={exercise}
-                    onExerciseEntryChanged={(date: string, entry: ExerciseEntry) => this.onExerciseEntryChanged(date, index, entry)}
-                />)}
-            </ScrollView>
+            <View style={styles.exerciseWrapper}>
+                <DraggableFlatList
+                    style={styles.exerciseContainer}
+                    data={workout.exercises}
+                    renderItem={(params: RenderItemParams<Exercise>) => <ExerciseComponent
+                        key={params.item.name}
+                        highlight={params.isActive}
+                        style={{ marginTop: params.index === 0 ? 15 : 0 }}
+                        exercise={params.item}
+                        onExerciseEntryChanged={(date: string, entry: ExerciseEntry) => this.onExerciseEntryChanged(date, params.index as number, entry)}
+                        onLongPress={() => params.drag()}
+                    />}
+                    keyExtractor={(item, index) => `draggable-item-${item.name}-${index}`}
+                    onDragBegin={() => Vibration.vibrate(10)}
+                    onDragEnd={({ data: exercises }) => this.onExercisesReordered(exercises)}
+                />
+            </View>
         </View>;
     }
 
     private onExerciseEntryChanged(date: string, exerciseIndex: number, entry: ExerciseEntry) {
         const workout = this.props.workout;
         workout.exercises[exerciseIndex].entries[date] = entry;
+        this.props.onWorkoutChanged(workout);
+    }
+
+    private onExercisesReordered(exercises: Exercise[]) {
+        exercises.forEach((exercise: Exercise, index: number) => {
+            exercise.order = index;
+        });
+
+        const workout = this.props.workout;
+        workout.exercises = exercises;
         this.props.onWorkoutChanged(workout);
     }
 }
@@ -84,9 +105,13 @@ const styles = StyleSheet.create({
         fontSize: 12
     },
 
+    exerciseWrapper: {
+        flex: 1,
+        marginTop: (StatusBar.currentHeight || 0) + 60
+    },
+
     exerciseContainer: {
         flex: 1,
-        alignSelf: 'stretch',
-        marginTop: (StatusBar.currentHeight || 0) + 60
+        alignSelf: 'stretch'
     }
 });
