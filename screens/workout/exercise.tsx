@@ -160,7 +160,8 @@ const style = StyleSheet.create({
         flex: 1,
         alignSelf: 'stretch',
         alignItems: 'stretch',
-        margin: 15
+        margin: 15,
+        paddingTop: 8
     },
 
     highlight: {
@@ -188,9 +189,10 @@ const style = StyleSheet.create({
     },
 
     setHeaderLabel: {
-        color: '#aaaaaa',
+        color: '#3d91e6',
         textTransform: 'uppercase',
-        fontSize: 12
+        fontSize: 12,
+        fontWeight: 'bold'
     },
 
     repsLabel: {

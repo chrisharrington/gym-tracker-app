@@ -110,8 +110,10 @@ const styles = StyleSheet.create({
     },
 
     innerHeaderSubText: {
-        color: '#eeeeee',
-        fontSize: 12
+        color: '#3d91e6',
+        fontSize: 12,
+        fontWeight: 'bold',
+        textTransform: 'uppercase'
     },
 
     exerciseWrapper: {
