@@ -18,6 +18,7 @@ export default class SetComponent extends React.Component<ISetComponentProps> {
             <View style={style.count}>
                 <StepInput
                     step={1}
+                    longStep={10}
                     value={this.props.reps}
                     onChange={(reps: number) => this.props.onSetChanged && this.props.onSetChanged(reps, this.props.weight || 0)}
                     width={48}
@@ -29,6 +30,7 @@ export default class SetComponent extends React.Component<ISetComponentProps> {
             <View style={style.weight}>
                 <StepInput
                     step={2.5}
+                    longStep={50}
                     value={this.props.weight}
                     display={(value: any) => value.toFixed(1)}
                     onChange={(weight: number) => this.props.onSetChanged && this.props.onSetChanged(this.props.reps || 0, weight)}

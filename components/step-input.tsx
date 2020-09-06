@@ -11,12 +11,13 @@ interface IStepInputProps {
     min?: number;
     max?: number;
     display?: (value: any) => string;
+    longStep?: number;
 }
 
 export default class StepInput extends React.Component<IStepInputProps> {
     render() {
         return <View style={style.container}>
-            <TouchableOpacity style={{ ...style.wrapper, ...style.wrapperLeft }} onPress={() => this.onDecrease(this.props.step)} onLongPress={() => this.onDecrease(this.props.step * 4)}>
+            <TouchableOpacity style={{ ...style.wrapper, ...style.wrapperLeft }} onPress={() => this.onDecrease(this.props.step)} onLongPress={() => this.onDecrease(this.props.longStep || (this.props.step * 4))}>
                 <Ionicons name='md-arrow-dropdown' color='#cccccc' size={16} />
             </TouchableOpacity>
         
@@ -24,7 +25,7 @@ export default class StepInput extends React.Component<IStepInputProps> {
                 <Text style={{ ...style.text, ...style.weight, ...{ color: this.props.value === undefined ? '#888888' : 'white' } }}>{this.getValue()}</Text>
             </View>
 
-            <TouchableOpacity style={{ ...style.wrapper, ...style.wrapperRight }} onPress={() => this.onIncrease(this.props.step)} onLongPress={() => this.onIncrease(this.props.step * 4)}>
+            <TouchableOpacity style={{ ...style.wrapper, ...style.wrapperRight }} onPress={() => this.onIncrease(this.props.step)} onLongPress={() => this.onIncrease(this.props.longStep || (this.props.step * 4))}>
                 <Ionicons name='md-arrow-dropup' color='#cccccc' size={16} />
             </TouchableOpacity>
         </View>;
