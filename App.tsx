@@ -47,6 +47,7 @@ class App extends React.Component<{}, IAppState> {
             />
 
             <Drawer.Navigator
+                initialRouteName={dayjs().format('dddd')}
                 drawerStyle={styles.drawer}
                 drawerContentOptions={{
                     activeTintColor: '#0398fc',
