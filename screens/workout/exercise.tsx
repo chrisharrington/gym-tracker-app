@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, TextInput } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -15,14 +15,28 @@ import dayjs from 'dayjs';
 interface IExerciseProps {
     exercise: Exercise;
     onExerciseEntryChanged: (date: string, entry: ExerciseEntry) => void;
+    onRename: (exercise: Exercise, name: string) => void;
     onLongPress?: () => void;
     style?: any;
     highlight?: boolean;
 }
 
-export default class ExerciseComponent extends React.Component<IExerciseProps> {
+interface IExerciseState {
+    name: string;
+}
+
+export default class ExerciseComponent extends React.Component<IExerciseProps, IExerciseState> {
+    state = {
+        name: ''
+    }
+
+    componentDidMount() {
+        this.setState({
+            name: this.props.exercise.name
+        });
+    }
+
     render() {
-        const exercise = this.props.exercise;
         return <Tile
             style={{ ...style.container, ...this.props.style || {}, ...(this.props.highlight ? style.highlight : {}) }}
         >
@@ -31,7 +45,13 @@ export default class ExerciseComponent extends React.Component<IExerciseProps> {
                 style={style.header}
                 onLongPress={() => this.props.onLongPress && this.props.onLongPress()}
             >
-                <Text style={style.headerText}>{exercise.name}</Text>
+                <TextInput
+                    style={style.headerText}
+                    onChangeText={(text) => this.onRename(text)}
+                    onBlur={() => this.props.onRename(this.props.exercise, this.state.name)}
+                    value={this.state.name}
+                    autoCapitalize='characters'
+                />
             </TouchableOpacity>
 
             <View style={style.setHeader}>
@@ -63,6 +83,10 @@ export default class ExerciseComponent extends React.Component<IExerciseProps> {
                 />
             </View>
         ));
+    }
+
+    private onRename(name: string) {
+        this.setState({ name });
     }
 
     private getMostRecentEntry(entries: { [date: string] : ExerciseEntry }) : ExerciseEntry | null {

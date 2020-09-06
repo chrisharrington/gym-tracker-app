@@ -39,6 +39,7 @@ export default class WorkoutScreen extends React.Component<IWorkoutScreenProps> 
                         highlight={params.isActive}
                         style={{ marginTop: params.index === 0 ? 15 : 0 }}
                         exercise={params.item}
+                        onRename={(exercise: Exercise, name: string) => this.onExerciseRenamed(exercise, name)}
                         onExerciseEntryChanged={(date: string, entry: ExerciseEntry) => this.onExerciseEntryChanged(date, params.index as number, entry)}
                         onLongPress={() => params.drag()}
                     />}
@@ -64,6 +65,14 @@ export default class WorkoutScreen extends React.Component<IWorkoutScreenProps> 
         const workout = this.props.workout;
         workout.exercises = exercises;
         this.props.onWorkoutChanged(workout);
+    }
+
+    private onExerciseRenamed(exercise: Exercise, name: string) {
+        const found = this.props.workout.exercises.find((e: Exercise) => e.name === exercise.name);
+        if (found) {
+            found.name = name;
+            this.props.onWorkoutChanged(this.props.workout);
+        }
     }
 }
 
