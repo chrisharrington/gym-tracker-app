@@ -92,8 +92,6 @@ export default class ExerciseComponent extends React.Component<IExerciseProps, I
             .map((date: string) => dayjs(date))
             .sort((first: dayjs.Dayjs, second: dayjs.Dayjs) => first.isBefore(second) ? 1 : -1);
 
-        console.log(dates);
-
         for (var i = 0; i < dates.length; i++) {
             const latest = dates[i];
             if (!latest.startOf('d').isSame(dayjs().startOf('d'))) {

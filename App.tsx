@@ -5,6 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { View } from 'react-native';
 import { useFonts, Oswald_400Regular } from '@expo-google-fonts/oswald';
+import * as Font from 'expo-font';
 import dayjs from 'dayjs'
 
 import { Workout } from './models';
@@ -16,32 +17,34 @@ import WorkoutScreen from './screens/workout';
 const Drawer = createDrawerNavigator();
 
 interface IAppState {
+    ready: boolean;
     workouts: Workout[];
 }
 
-export default () => {
-    const [fontsLoaded] = useFonts({
-        'Oswald': Oswald_400Regular
-    });
-
-    return fontsLoaded ? <App /> : <AppLoading />;
-}
-
-class App extends React.Component<{}, IAppState> {
+export default class App extends React.Component<{}, IAppState> {
     private updateTimeout: any;
 
     state = {
+        ready: false,
         workouts: []
     }
 
     async componentDidMount() {
+        const [workouts] = await Promise.all([
+            WorkoutsApi.get(),
+            Font.loadAsync({
+                'Oswald': Oswald_400Regular
+            })
+        ])
+
         this.setState({
-            workouts: await WorkoutsApi.get()
+            workouts,
+            ready: true
         });
     }
 
     render() {
-        return this.state.workouts.length ? <NavigationContainer>
+        return this.state.ready ? <NavigationContainer>
             <StatusBar
                 style='light'
             />
@@ -68,7 +71,7 @@ class App extends React.Component<{}, IAppState> {
                     </Drawer.Screen>
                 })}
             </Drawer.Navigator>
-        </NavigationContainer> : <View />;
+        </NavigationContainer> : <AppLoading />;
     }
 
     private onWorkoutChanged(workout: Workout) {
