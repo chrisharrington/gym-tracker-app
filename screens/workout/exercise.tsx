@@ -68,9 +68,7 @@ export default class ExerciseComponent extends React.Component<IExerciseProps, I
     }
 
     private renderSets() : JSX.Element[] {
-        const today = this.props.exercise.entries[Util.today()] || { sets: [] },
-            recent = this.getMostRecentEntry(this.props.exercise.entries);
-
+        const today = this.props.exercise.entries[Util.today()] || { sets: [] };
         return today.sets.map((set, index) => (
             <View key={index} style={style.set}>
                 <SetComponent
@@ -92,12 +90,17 @@ export default class ExerciseComponent extends React.Component<IExerciseProps, I
     private getMostRecentEntry(entries: { [date: string] : ExerciseEntry }) : ExerciseEntry | null {
         const dates = Object.keys(entries)
             .map((date: string) => dayjs(date))
-            .sort((first: dayjs.Dayjs, second: dayjs.Dayjs) => first.isBefore(second) ? -1 : 1);
+            .sort((first: dayjs.Dayjs, second: dayjs.Dayjs) => first.isBefore(second) ? 1 : -1);
 
-        if (dates.length > 0) {
-            const latest = dates[0];
-            if (!latest.startOf('d').isSame(dayjs().startOf('d')))
-                return entries[latest.format('MM/DD/YYYY')];
+        console.log(dates);
+
+        for (var i = 0; i < dates.length; i++) {
+            const latest = dates[i];
+            if (!latest.startOf('d').isSame(dayjs().startOf('d'))) {
+                const entry = entries[latest.format('MM/DD/YYYY')];
+                if (entry.sets.length)
+                    return entry;
+            }
         }
 
         return null;
