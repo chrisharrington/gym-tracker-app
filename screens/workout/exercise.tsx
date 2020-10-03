@@ -134,7 +134,7 @@ export default class ExerciseComponent extends React.Component<IExerciseProps, I
             set.reps = latest.reps;
             set.weight = latest.weight;
         } else if (recent) {
-            const s = recent.sets[0];
+            const s = recent.sets[recent.sets.length-1];
             if (s) {
                 set.reps = s.reps;
                 set.weight = s.weight;

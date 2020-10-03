@@ -35,7 +35,7 @@ export default class App extends React.Component<{}, IAppState> {
             Font.loadAsync({
                 'Oswald': Oswald_400Regular
             })
-        ])
+        ]);
 
         this.setState({
             workouts,
